@@ -159,8 +159,9 @@
   }
 
   function enso(t) {
-    var cx = W > 860 ? W * 0.72 : W * 0.62, cy = H * (W > 860 ? 0.42 : 0.3);
-    var R = Math.min(W, H) * (W > 860 ? 0.3 : 0.26);
+    var wide = W > 860;
+    var cx = wide ? W * 0.72 : W * 0.6, cy = wide ? H * 0.42 : 74 + W * 0.33;
+    var R = wide ? Math.min(W, H) * 0.3 : W * 0.27;
     var a0 = -1.1, sweep = 5.75, steps = 1400;
     b.clearRect(0, 0, W, H);
     for (var i = 0; i <= steps * t; i++) {
