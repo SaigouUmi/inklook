@@ -152,4 +152,6 @@ footer { border-top: 1px solid var(--hair); padding: 26px 0 40px; display: flex;
   .bar nav { gap: 18px; }
   section { padding: 72px 0; }
   .scroll .mount { padding: 12px 10px 22px; border-top-width: 6px; border-bottom-width: 9px; }
+  .hero > .wrap { min-height: 0; padding-bottom: 56px; }
+  .hero .copy { padding-top: 60vw; }
 }
