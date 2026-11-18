@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>InkLook docs · SaigouUmi</title>
+<meta name="description" content="How to set up and use InkLook: the sumi-ink look, the live ink canvas, recordings and ink effects for Unity 6 URP.">
+<link rel="icon" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <a class="maker brush" href="./"><span class="seal" aria-hidden="true">墨</span>SaigouUmi</a>
+    <nav><a href="./">InkLook</a><a href="./#trailer">Trailer</a><a href="docs.html" aria-current="page">Docs</a></nav>
+  </header>
+
+  <div class="docs">
+    <nav class="toc" aria-label="On this page">
+      <p class="brush">Contents</p>
+      <ol>
+        <li><a href="#start">Before you start</a></li>
+        <li><a href="#setup">Setup</a></li>
+        <li><a href="#look">The look</a></li>
+        <li><a href="#code">Effects from code</a></li>
+        <li><a href="#canvas">The ink canvas</a></li>
+        <li><a href="#brushes">Brushes</a></li>
+        <li><a href="#seals">Two inks and seals</a></li>
+        <li><a href="#record">Recording and replay</a></li>
+        <li><a href="#effects">Ink as game effects</a></li>
+        <li><a href="#tuning">Tuning</a></li>
+        <li><a href="#perf">Performance</a></li>
+        <li><a href="#trouble">Troubleshooting</a></li>
+        <li><a href="#credits">Credits and licences</a></li>
+      </ol>
+    </nav>
+
+    <article class="doc">
+      <h1 class="brush">InkLook docs</h1>
+      <p>Everything you need to get InkLook running and to bend it to your game. The same docs ship inside the package as <code>README.md</code>, so you can read them offline too.</p>
+      <p>InkLook started as the look of my own game, <em>Before the Ink Runs</em>. I pulled it out so it works in any URP project.</p>
+
+      <h2 class="brush" id="start">Before you start</h2>
+      <ul>
+        <li><strong>Unity 6</strong> (6000.0 or newer). I build and test on 6000.3.</li>
+        <li><strong>URP 17.</strong> Built-in and HDRP are not supported.</li>
+        <li>The core needs nothing else. The demo scenes use TextMeshPro, which is part of Unity UI.</li>
+      </ul>
+      <p>What's in the box:</p>
+      <table>
+        <tr><th>Folder</th><th>What it holds</th></tr>
+        <tr><td><code>Shaders/</code></td><td>Object shading, the full-screen ink pass, brush strokes, particles, the scene transition and the canvas shaders</td></tr>
+        <tr><td><code>Runtime/</code></td><td>All the components and the scripting API (assembly <code>InkLook.Runtime</code>)</td></tr>
+        <tr><td><code>Editor/</code></td><td>The <strong>Tools &gt; Ink Look</strong> menu, plus record and replay buttons on the canvas inspector</td></tr>
+        <tr><td><code>Recordings/</code></td><td><code>Enso</code> and <code>Slash</code>, ready to play as effects</td></tr>
+        <tr><td><code>Demo/</code></td><td>Two demo scenes and their scripts. Delete it if you don't need it.</td></tr>
+        <tr><td><code>Textures/</code></td><td>The paper grain, brush and splat alphas, and two seals</td></tr>
+        <tr><td><code>Resources/InkLook/</code></td><td>Transition settings, and the canvas resources that make runtime canvases work in builds</td></tr>
+      </table>
+
+      <h2 class="brush" id="setup">Setup</h2>
+      <p>Four steps, about two minutes.</p>
+      <ol>
+        <li>Import the package, or copy the <code>InkLook</code> folder into <code>Assets/</code>. It also works as an embedded package in <code>Packages/</code>; the <code>package.json</code> is there.</li>
+        <li>Run <strong>Tools &gt; Ink Look &gt; Add Ink Pass to Renderer.</strong> It uses the renderer you have selected in the Project window, or the default renderer of your URP asset. You get your own copy of the ink material at <code>Assets/InkLookSettings/M_InkPost.mat</code>.</li>
+        <li>In each scene, run <strong>Tools &gt; Ink Look &gt; Add Ink World to Scene.</strong> It adds the object that feeds the shaders (paper colour, grain, distance fade) and the brush-stroke spawner, and makes the camera background paper-coloured.</li>
+        <li>Give your objects ink materials with <strong>Assets &gt; Create &gt; Ink Look &gt; Ink Lit Material.</strong> Each one has three tones: light, mid and shade.</li>
+      </ol>
+      <p>Want to see it first? Open the demo scenes in <code>Demo/Scenes</code>. <code>InkLookDemo</code> has a button for every effect (it needs the ink pass on the default renderer). <code>InkCanvasDemo</code> is the painting demo. If Unity asks, import <em>TMP Essential Resources</em>.</p>
+
+      <h2 class="brush" id="look">The look</h2>
+      <p>The look is made of a few parts that you can use together or on their own.</p>
+      <h3>Ink Lit (object shading)</h3>
+      <p>Objects get three flat tones instead of smooth lighting, the way an ink painter lays down a few washes. A little grain noise wobbles the border between tones so it looks like a brush edge, and objects fade into the paper with distance and towards their feet.</p>
+      <h3>Ink Post (the full-screen pass)</h3>
+      <p>One full-screen pass turns the frame into a painting: outlines from depth and normals, brush pressure along the lines, a slight hand wobble, dry-brush breakup, a soft wash beside each line, paper grain and a light vignette. Lines fade out with distance, so far scenery is drawn in wash only.</p>
+      <h3>InkWorld</h3>
+      <p>The <code>InkWorld</code> component holds the paper colour and distance fade for the scene, and drives the full-screen moments below.</p>
+      <h3>Brush strokes and the transition</h3>
+      <p><code>BrushFx</code> paints arcs, rings, streaks, bursts and splats in the world. <code>SceneTransition</code> paints the screen over with ink, swaps the scene, then wipes it away. Brush strokes use unscaled time, so they keep playing during hit-stop or slow motion.</p>
+
+      <h2 class="brush" id="code">Effects from code</h2>
+      <pre><code>using InkLook;
+
+//painted scene change (works with nothing in the scene)
+SceneTransition.Go("Level01");
+SceneTransition.Run(() =&gt; player.Respawn());               //cover, do something, reveal
+SceneTransition.CoverStarted += () =&gt; audio.Play("brush"); //hook your own sounds
+
+//full-screen moments, 0..1
+InkWorld.Flash = 1f;        //flash of bare paper, fade it out yourself
+InkWorld.Invert = 1f;       //ink negative
+InkWorld.ScreenBleed = 0.5f;//wet stains creeping in from the edges
+InkWorld.Dissolve = 1f;     //the picture washes into the paper
+
+//brush strokes in the world (side-on, drawn at BrushFx.zPlane)
+BrushFx.Arc(centre, radius, fromDeg, toDeg, width, BrushFx.Ink, life);
+BrushFx.Ring(centre, radius, width, BrushFx.Ink, life, grow);
+BrushFx.Streak(a, b, width, BrushFx.Wash, life);
+BrushFx.Burst(centre, count, inner, outer, width, BrushFx.Ink, life);
+BrushFx.Splat(centre, size, BrushFx.Ink, life);</code></pre>
+
+      <h2 class="brush" id="canvas">The ink canvas</h2>
+      <p><code>InkCanvas</code> is a sheet of paper you paint on. The ink is simulated on the GPU: it bleeds into the paper while wet, dries with a slightly darker rim, and breaks into dry-brush streaks when the brush runs out over a long stroke. It works on its own, so you don't need the ink pass or <code>InkWorld</code> for it.</p>
+      <h3>Three ways to paint</h3>
+      <ul>
+        <li><strong>On screen (UI):</strong> put a <code>RawImage</code> in a Canvas and add <code>InkCanvasView</code>. It shows the sheet, keeps its aspect and paints with mouse, touch or pen. Pen pressure changes the width. You need an EventSystem in the scene.</li>
+        <li><strong>On a 3D object:</strong> add <code>InkCanvasSurface</code> to an object with a <code>MeshCollider</code>, like a quad for a scroll or a paper screen. The camera needs a <code>PhysicsRaycaster</code>.</li>
+        <li><strong>From code:</strong> feed it strokes yourself, in sheet coordinates (0..1, origin bottom-left).</li>
+      </ul>
+      <pre><code>var sheet = GetComponent&lt;InkCanvas&gt;();
+sheet.brush = InkBrush.Dry();            //presets: Bold(), Wet(), Dry(), Fine(), Splash()
+sheet.BeginStroke(uv, pressure);         //brush down
+sheet.MoveStroke(uv, pressure);          //every time the pointer moves
+sheet.EndStroke();                       //brush up, a fast stroke ends in a flick
+sheet.Stroke(listOfPoints);              //a whole stroke at once
+sheet.Splash(uv, direction, 40f, 1f);    //blot, spikes and drops
+sheet.StampSeal(sealTexture, uv, 60f);   //press a seal, vermilion by default
+
+sheet.Undo(); sheet.Clear(); sheet.DryNow();
+string file = sheet.SavePNG();           //persistentDataPath, or pass a path
+Texture2D copy = sheet.Capture();        //a readable copy, destroy it when done
+rawImage.texture = sheet.Texture;        //the live sheet (a RenderTexture)</code></pre>
+
+      <h2 class="brush" id="brushes">Brushes</h2>
+      <p>The five presets are just different values of the same settings, so start from one and tweak.</p>
+      <table>
+        <tr><th>Setting</th><th>What it does</th></tr>
+        <tr><td>size</td><td>Brush width in sheet pixels</td></tr>
+        <tr><td>ink</td><td>How dark the stroke is</td></tr>
+        <tr><td>water</td><td>How much it bleeds into the paper</td></tr>
+        <tr><td>dryness</td><td>How streaky the bristles are</td></tr>
+        <tr><td>inkReach</td><td>How far it goes before running dry</td></tr>
+        <tr><td>speedThinning</td><td>Fast strokes get thinner, like a lifted brush</td></tr>
+        <tr><td>pressure</td><td>How much pen pressure widens the line</td></tr>
+        <tr><td>startTaper / flick</td><td>The thin start, and the point a quick lift leaves</td></tr>
+        <tr><td>smoothing</td><td>A lazy brush that turns shaky input into clean curves</td></tr>
+        <tr><td>spatter</td><td>Drops and spikes thrown off fast strokes</td></tr>
+        <tr><td>hardness</td><td>From a soft round tip to a crisp edge</td></tr>
+        <tr><td>tint</td><td>0 = first ink, 1 = second ink, anything between mixes</td></tr>
+      </table>
+      <p>The sheet itself has its own settings: resolution, paper and ink colours, grain, density, and how the wet ink behaves (flow, evaporation, settle, edge settle for the dark rim, pin, fibre, mobility, steps per second and undo levels).</p>
+
+      <h2 class="brush" id="seals">Two inks and seals</h2>
+      <p>Every canvas has two inks: <code>ink</code> (sumi) and <code>ink2</code> (vermilion by default). A brush picks one with <code>tint</code>. The two mix where they meet, and the second ink bleeds and dries just like the first.</p>
+      <p><code>StampSeal(texture, uv, size, angle, tint)</code> presses a seal using the texture's alpha, with uneven paste and missed specks. Two seals come in <code>Textures/</code>, and any texture with alpha works as your own seal. <code>InkCanvasView</code> stamps on click when its <code>tool</code> is set to <code>Seal</code>.</p>
+
+      <h2 class="brush" id="record">Recording and replay</h2>
+      <p>A recording stores what the hand did, not the picture. When you replay it, the simulation paints it again, wet and bleeding, with the same spatter and specks.</p>
+      <pre><code>sheet.StartRecording();
+//...paint...
+InkRecording r = sheet.StopRecording();                 //pauses over 0.6 s get shortened
+sheet.Play(r);                                          //draws it back, animated
+sheet.Play(r, new Rect(0.6f, 0.1f, 0.3f, 0.3f), 2f);    //into a corner, twice as fast
+string json = r.ToJson();                               //save it anywhere
+var again = InkRecording.FromJson(json, seals);         //and load it back</code></pre>
+      <ul>
+        <li>Several recordings can play at once, and the player can keep painting while they do.</li>
+        <li>In Play mode the canvas inspector has <strong>Start / Stop recording</strong>, <strong>Replay</strong> and <strong>Save as asset</strong> (saved to <code>Assets/InkLookSettings/Recordings</code>).</li>
+        <li>You can also write recordings in code with <code>AddStroke</code>, <code>AddSplash</code>, <code>AddSeal</code> and <code>AddClear</code>. That's how I made the included Enso and Slash.</li>
+        <li><code>InkPlayer</code> plays a recording on the canvas next to it, on start and looping if you want. Good for calligraphy that writes itself on a title screen.</li>
+      </ul>
+
+      <h2 class="brush" id="effects">Ink as game effects</h2>
+      <h3>On the screen</h3>
+      <p><code>InkScreenFx</code> lays a see-through canvas over the whole screen. Ink lands, bleeds, dries and fades by itself. It makes itself the first time you use it; add one to a scene only if you want to change its settings.</p>
+      <pre><code>InkScreenFx.Splash(screenPoint, screenDirection, 60f, 1f);           //a big hit
+InkScreenFx.SplashAtWorld(hit.point, attackDirection, tint: 1f);     //vermilion, where the hit is on screen
+InkScreenFx.Play(slashRecording, new Rect(0.05f, 0.1f, 0.9f, 0.8f)); //a finisher stroke across the screen</code></pre>
+      <h3>In the world</h3>
+      <p><code>InkSplashSurface</code> on an object with a <code>MeshCollider</code> and an <code>InkCanvas</code> splashes ink where things hit it. It reacts to collisions (faster hits splash bigger), or you call <code>Hit(point, direction, strength)</code> for bullets, raycasts and attacks.</p>
+      <p>For ink without a paper sheet, turn on <code>transparentPaper</code> on the canvas and give the object the <code>InkLook/Canvas/Decal</code> material, laid just over a floor or wall.</p>
+      <div class="note">Any canvas can be an effect. <code>transparentPaper</code> draws only the ink, <code>fadePerSecond</code> makes new ink fade away, and <code>FadeAway(1f)</code> fades out everything already there, say to clean a floor after a fight.</div>
+
+      <h2 class="brush" id="tuning">Tuning</h2>
+      <table>
+        <tr><th>To change</th><th>Go to</th></tr>
+        <tr><td>Paper, outlines, wash, wobble, vignette</td><td><code>Assets/InkLookSettings/M_InkPost.mat</code></td></tr>
+        <tr><td>Paper colour, distance fade</td><td>The <code>InkWorld</code> component</td></tr>
+        <tr><td>Transition timings and sounds</td><td><strong>Tools &gt; Ink Look &gt; Edit Transition Settings</strong></td></tr>
+      </table>
+      <p>I tuned the outline thresholds (<code>Depth Threshold</code>, <code>Line Fade</code>) for a 30° camera 15 to 20 m from the action. If your camera is much closer or further, retune those two first.</p>
+
+      <h2 class="brush" id="perf">Performance</h2>
+      <ul>
+        <li>The look costs one full-screen pass per frame.</li>
+        <li>A canvas costs nothing while it's dry. While wet, it runs up to 12 small simulation steps per frame.</li>
+        <li>A 1600 × 1000 canvas uses about 32 MB, plus about 13 MB per undo level in use (8 by default). Effect canvases use 0 undo levels.</li>
+        <li>The screen effect canvas runs at 60% of screen resolution. Lower it, or the undo levels, on mobile.</li>
+      </ul>
+
+      <h2 class="brush" id="trouble">Troubleshooting</h2>
+      <h3>Nothing looks inked</h3>
+      <p>The ink pass isn't on the renderer your camera uses. Select that renderer in the Project window and run <strong>Add Ink Pass to Renderer</strong> again, then check the camera's Renderer dropdown.</p>
+      <h3>Outlines are too thick, too thin or flicker</h3>
+      <p>Your camera distance is different from what I tuned for. Adjust <code>Depth Threshold</code> and <code>Line Fade</code> on <code>M_InkPost</code>.</p>
+      <h3>I can't paint on the canvas</h3>
+      <p>On UI: add an EventSystem. On a 3D object: make sure it has a <code>MeshCollider</code> and the camera has a <code>PhysicsRaycaster</code>.</p>
+      <h3>Canvases work in the editor but not in a build</h3>
+      <p>Keep <code>Resources/InkLook/InkCanvasResources.asset</code> in the project. Runtime canvases find their shaders through it.</p>
+      <h3>The demo title is missing</h3>
+      <p>Import <em>TMP Essential Resources</em> when Unity asks.</p>
+
+      <h2 class="brush" id="credits">Credits and licences</h2>
+      <p>The shaders, code and textures are original to InkLook. I designed it and directed every feature, and built it together with Claude, an AI model from Anthropic, which wrote the code to my direction. The seals were rendered from the character 墨 in Yuji Boku, and the demo title uses Kaushan Script. Both fonts are under the SIL Open Font License.</p>
+      <p>Questions or bugs: <a href="mailto:SaigouUmi@gmail.com">SaigouUmi@gmail.com</a>.</p>
+    </article>
+  </div>
+
+  <footer>
+    <span>© 2026 SaigouUmi</span>
+    <span>Fonts: Kaushan Script and Shippori Mincho, SIL Open Font License</span>
+  </footer>
+</div>
+</body>
+</html>
