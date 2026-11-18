@@ -134,6 +134,7 @@ footer { border-top: 1px solid var(--hair); padding: 26px 0 40px; display: flex;
 .doc li { margin: 6px 0; }
 .doc code { font: 15px/1.5 ui-monospace, "Cascadia Mono", Consolas, monospace; background: var(--paper-2); padding: 1px 5px; border-radius: 3px; }
 .doc pre { background: var(--paper-2); border-left: 3px solid var(--ink); padding: 18px 20px; overflow-x: auto; border-radius: 0 4px 4px 0; }
+.doc p code, .doc li code { overflow-wrap: anywhere; }
 .doc pre code { background: none; padding: 0; font-size: 14.5px; }
 .doc table { width: 100%; border-collapse: collapse; font-size: 16px; margin: 14px 0 6px; }
 .doc th, .doc td { text-align: left; padding: 9px 12px 9px 0; border-bottom: 1px solid var(--hair); vertical-align: top; }
@@ -147,7 +148,8 @@ footer { border-top: 1px solid var(--hair); padding: 26px 0 40px; display: flex;
   .halves .half:nth-child(2) { margin-top: 0; }
   .facts { grid-template-columns: 1fr; }
   .facts div + div { padding-left: 0; border-left: 0; border-top: 1px solid var(--hair); }
-  .docs { grid-template-columns: 1fr; gap: 20px; }
+  .docs { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .doc table { display: block; overflow-x: auto; }
   .toc { position: static; }
   .bar nav { gap: 18px; }
   section { padding: 72px 0; }
