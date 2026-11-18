@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SaigouUmi · InkLook for Unity</title>
+<meta name="description" content="InkLook: a sumi-ink look and a live wet-ink canvas for Unity 6 URP, by SaigouUmi.">
+<meta property="og:title" content="InkLook by SaigouUmi">
+<meta property="og:description" content="Paint your game in living ink. A sumi-ink look and live wet-ink canvas for Unity 6 URP.">
+<meta property="og:image" content="media/cover.jpg">
+<link rel="icon" href="favicon.png">
+<style>
+@font-face { font-family: "Kaushan"; src: url("fonts/KaushanScript-Regular.ttf") format("truetype"); font-display: swap; }
+:root {
+  --paper: #eeeae2;
+  --paper-deep: #e4dfd4;
+  --ink: #1c1a18;
+  --ink-soft: #55504a;
+  --rule: #cfc8bb;
+  --red: #c7261a;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font: 17px/1.6 "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+}
+a { color: inherit; text-decoration-color: var(--red); text-underline-offset: 3px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+.brush { font-family: "Kaushan", cursive; font-weight: 400; letter-spacing: .01em; }
+
+header.top { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
+header.top .mark { display: flex; align-items: center; gap: 10px; font-size: 26px; text-decoration: none; }
+header.top .mark i { width: 22px; height: 22px; background: var(--red); border-radius: 3px; display: inline-block; transform: rotate(4deg); }
+header.top nav a { margin-left: 22px; font-size: 15px; color: var(--ink-soft); text-decoration: none; }
+header.top nav a:hover { color: var(--ink); }
+
+.hero { padding: 28px 0 56px; }
+.hero h1 { font-size: clamp(64px, 11vw, 132px); line-height: .95; margin: 0; }
+.hero .tag { font-size: clamp(22px, 3vw, 30px); margin: 10px 0 0; color: var(--ink-soft); }
+.hero .lede { max-width: 640px; margin: 22px 0 30px; font-size: 19px; }
+.badges { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 34px; }
+.badges span { border: 1px solid var(--rule); padding: 4px 12px; border-radius: 999px; font-size: 14px; color: var(--ink-soft); }
+.frame { background: #000; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 0 var(--rule), 0 18px 40px -24px rgba(0,0,0,.45); }
+.frame video, .frame img { display: block; width: 100%; height: auto; }
+
+section { padding: 64px 0; border-top: 1px solid var(--rule); }
+section h2 { font-size: clamp(36px, 5vw, 52px); margin: 0 0 8px; }
+section .sub { color: var(--ink-soft); margin: 0 0 34px; max-width: 640px; }
+
+.halves { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; }
+.half h3 { font-size: 30px; margin: 18px 0 8px; }
+.half ul { margin: 0; padding-left: 20px; }
+.half li { margin: 6px 0; }
+.half li::marker { color: var(--red); }
+
+.loops { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+.loop figcaption { font-size: 15px; color: var(--ink-soft); margin-top: 8px; }
+figure { margin: 0; }
+
+.shots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+.facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.facts div { border-left: 3px solid var(--red); padding: 2px 0 2px 14px; }
+.facts b { display: block; font-size: 15px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; }
+
+.cta { text-align: center; padding: 80px 0; }
+.cta h2 { margin-bottom: 14px; }
+.button { display: inline-block; background: var(--ink); color: var(--paper); text-decoration: none; padding: 14px 28px; border-radius: 4px; font-size: 17px; }
+.button.soon { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); }
+.cta p { color: var(--ink-soft); }
+
+footer { border-top: 1px solid var(--rule); padding: 28px 0 40px; color: var(--ink-soft); font-size: 14px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+
+@media (max-width: 760px) {
+  .halves, .loops, .shots, .facts { grid-template-columns: 1fr; }
+  header.top nav { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="mark brush" href="#"><i></i>SaigouUmi</a>
+    <nav><a href="#inklook">InkLook</a><a href="#effects">Effects</a><a href="#details">Details</a><a href="#contact">Contact</a></nav>
+  </header>
+
+  <div class="hero" id="inklook">
+    <h1 class="brush">InkLook</h1>
+    <p class="tag brush">Paint your game in living ink</p>
+    <p class="lede">A sumi-ink look for Unity, plus a live ink canvas where ink bleeds into the paper and dries with a dark rim. Use it to restyle a whole game, or as splashes, strokes and seals inside one.</p>
+    <div class="badges"><span>Unity 6</span><span>URP 17</span><span>Shaders + C#</span><span>2 demo scenes</span></div>
+    <div class="frame">
+      <video controls preload="metadata" poster="media/poster.jpg" playsinline>
+        <source src="media/trailer.mp4" type="video/mp4">
+      </video>
+    </div>
+  </div>
+
+  <section>
+    <h2 class="brush">Two halves, one paper</h2>
+    <p class="sub">The look and the canvas share the same paper colour and grain, so ink you paint sits naturally in the shaded world.</p>
+    <div class="halves">
+      <div class="half">
+        <div class="frame"><img src="media/shot_02.jpg" alt="A torii gate split between standard URP lighting and the InkLook ink style" loading="lazy"></div>
+        <h3 class="brush">The look</h3>
+        <ul>
+          <li>Three flat ink tones with brushy borders, and mist that fades distant objects into the paper</li>
+          <li>Full-screen outlines with brush pressure, line wobble, dry-brush breakup and edge wash</li>
+          <li>Screen moments from code: ink bleeding in, dissolve to paper, paper flash, ink negative</li>
+          <li>World brush strokes and an ink-painted scene transition</li>
+        </ul>
+      </div>
+      <div class="half">
+        <div class="frame"><video autoplay muted loop playsinline preload="metadata" src="media/loop_wet.mp4" aria-label="A wet ink wash bleeding into paper"></video></div>
+        <h3 class="brush">The live ink canvas</h3>
+        <ul>
+          <li>GPU wet-ink simulation: ink spreads along the paper fibres, then dries</li>
+          <li>Five brushes: bold, wet wash, dry brush, fine line, splash</li>
+          <li>Splashes, hanko seals and a second ink colour that mixes with black</li>
+          <li>Record strokes and replay them anywhere, at any size and speed</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="effects">
+    <h2 class="brush">Ink as game effects</h2>
+    <p class="sub">Every effect is a canvas with see-through paper, placed over the screen or onto a surface.</p>
+    <div class="loops">
+      <figure class="loop"><div class="frame"><video autoplay muted loop playsinline preload="metadata" src="media/loop_floor.mp4"></video></div><figcaption>Ink balls splash on the floor where they hit</figcaption></figure>
+      <figure class="loop"><div class="frame"><video autoplay muted loop playsinline preload="metadata" src="media/loop_enso.mp4"></video></div><figcaption>A recorded ensō paints itself on the ground</figcaption></figure>
+      <figure class="loop"><div class="frame"><video autoplay muted loop playsinline preload="metadata" src="media/loop_seal.mp4"></video></div><figcaption>A stroke, then a hanko seal with uneven paste</figcaption></figure>
+      <figure class="loop"><div class="frame"><img src="media/shot_05.jpg" alt="Brush strokes, a vermilion sun and a red seal painted on the canvas" loading="lazy"></div><figcaption>Dry brush, two inks and a seal on one sheet</figcaption></figure>
+    </div>
+  </section>
+
+  <section id="details">
+    <h2 class="brush">Details</h2>
+    <p class="sub">What you need, and what it costs to run.</p>
+    <div class="facts">
+      <div><b>Requires</b>Unity 6 (6000.0+) with URP 17. Built-in and HDRP are not supported.</div>
+      <div><b>Performance</b>The look is one full-screen pass. A canvas is free while dry and a few GPU passes per frame while wet.</div>
+      <div><b>Included</b>2 demo scenes, 2 stroke recordings, 2 seals, a setup menu and offline documentation.</div>
+    </div>
+  </section>
+
+  <section class="cta" id="contact">
+    <h2 class="brush">Coming to the Unity Asset Store</h2>
+    <p>InkLook is coming soon. This page will link to the store listing once it is live.</p>
+    <p><a class="button soon" href="mailto:SaigouUmi@gmail.com">SaigouUmi@gmail.com</a></p>
+  </section>
+
+  <footer>
+    <span>© 2026 SaigouUmi</span>
+    <span>Title font: Kaushan Script, SIL Open Font License</span>
+  </footer>
+</div>
+</body>
+</html>
