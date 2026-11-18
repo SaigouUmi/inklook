@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Brush Is the Sword · an InkLook mini game · SaigouUmi</title>
+<meta name="description" content="A one-minute mini game made with InkLook for Unity URP. Drag across the straw to cut it, and leave the red lanterns alone. Plays in the browser.">
+<meta property="og:title" content="The Brush Is the Sword">
+<meta property="og:description" content="A one-minute ink mini game made with InkLook for Unity. Plays in the browser.">
+<meta property="og:image" content="https://saigouumi.github.io/inklook/play/poster.jpg">
+<link rel="icon" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<style>
+.play h1 { font-size: clamp(46px, 8vw, 104px); line-height: .95; margin: 14px 0 14px -3px; font-weight: 400; }
+.play .lede { color: var(--usuzumi); max-width: 34em; margin: 0 0 36px; }
+.stage { width: 100%; }
+.scroll .mount > .game { position: relative; aspect-ratio: 16 / 9; background: var(--paper); overflow: hidden; }
+.game canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; outline: none; background: var(--paper); cursor: crosshair; }
+.veil { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 18px; padding: 24px; text-align: center; background: var(--paper); transition: opacity .7s; }
+.veil.gone { opacity: 0; pointer-events: none; }
+.veil p { font-size: clamp(26px, 4vw, 44px); margin: 0; }
+.veil small { color: var(--usuzumi); font-size: 15px; max-width: 30em; }
+.load { width: min(320px, 60vw); height: 3px; background: var(--hair); }
+.load i { display: block; height: 100%; width: 0; background: var(--ink); transition: width .25s; }
+.stage button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; text-decoration-color: var(--usuzumi); }
+.stage button:hover { text-decoration-color: var(--shu); }
+.rules { padding: 72px 0 0; }
+@media (max-width: 700px) {
+  .scroll .mount > .game { aspect-ratio: 9 / 15; }
+}
+@media (prefers-reduced-motion: reduce) { .veil, .load i { transition: none; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="bar">
+    <a class="maker brush" href="../"><span class="seal" aria-hidden="true">墨</span>SaigouUmi</a>
+    <nav><a href="../">InkLook</a><a href="../docs.html">Docs</a></nav>
+  </header>
+</div>
+
+<main class="wrap play">
+  <h1 class="brush">The Brush Is the Sword</h1>
+  <p class="lede">I told my master painting is boring. He handed me a brush and pointed at the straw.</p>
+
+  <div class="scroll stage">
+    <div class="mount">
+      <div class="game">
+        <canvas id="unity-canvas" tabindex="-1" aria-label="The Brush Is the Sword, a mini game. Drag to cut."></canvas>
+        <div class="veil" id="veil">
+          <p class="brush" id="veil-text">Grinding the ink</p>
+          <div class="load" id="load"><i id="load-bar"></i></div>
+          <small id="veil-note"></small>
+        </div>
+      </div>
+    </div>
+    <p>One minute a round, with sound. <button type="button" id="full">Fill the screen</button></p>
+  </div>
+
+  <section class="rules">
+    <div class="facts">
+      <div><h3 class="brush">Cut the straw</h3><p>Drag across a straw target to cut it. The drag is a real brush stroke, so it runs dry: lift and start a new one.</p></div>
+      <div><h3 class="brush">Spare the lanterns</h3><p>The red lanterns belong to the master. Two targets in one stroke count extra.</p></div>
+      <div><h3 class="brush">Three mistakes</h3><p>Let straw reach you or cut a lantern three times, and the master shows you what a brush is for.</p></div>
+    </div>
+  </section>
+
+  <div class="closing">
+    <h2 class="brush">Made with InkLook</h2>
+    <p>Everything in the game is Unity's own cube, sphere and cylinder. The painted look, the ink on the screen and the ink on the floor are all InkLook.</p>
+    <div class="actions">
+      <a class="btn shu" href="../">See InkLook</a>
+      <a href="../docs.html">Read the docs</a>
+    </div>
+  </div>
+
+  <footer>
+    <span>© 2026 SaigouUmi</span>
+    <span>Fonts: Kaushan Script and Shippori Mincho, SIL Open Font License</span>
+  </footer>
+</main>
+
+<script src="Build/play.loader.js"></script>
+<script>
+(function () {
+  var canvas = document.getElementById('unity-canvas');
+  var veil = document.getElementById('veil'), bar = document.getElementById('load-bar');
+  var text = document.getElementById('veil-text'), note = document.getElementById('veil-note');
+  var game = null;
+
+  function failed(why) {
+    text.textContent = 'The ink would not start';
+    document.getElementById('load').style.display = 'none';
+    note.textContent = why || 'This browser could not run the game. A recent Chrome, Edge, Firefox or Safari should.';
+  }
+
+  if (typeof createUnityInstance !== 'function') { failed(); return; }
+
+  createUnityInstance(canvas, {
+    dataUrl: 'Build/play.data.unityweb',
+    frameworkUrl: 'Build/play.framework.js.unityweb',
+    codeUrl: 'Build/play.wasm.unityweb',
+    streamingAssetsUrl: 'StreamingAssets',
+    companyName: 'SaigouUmi',
+    productName: 'The Brush Is the Sword',
+    productVersion: '1.0',
+    //phones have more pixels than the ink needs
+    devicePixelRatio: Math.min(window.devicePixelRatio || 1, 1.5),
+    showBanner: function (msg, type) { if (type === 'error') failed(); }
+  }, function (p) {
+    bar.style.width = Math.round(p * 100) + '%';
+  }).then(function (instance) {
+    game = instance;
+    veil.classList.add('gone');
+  }).catch(function () { failed(); });
+
+  document.getElementById('full').addEventListener('click', function () {
+    if (game) game.SetFullscreen(1);
+  });
+})();
+</script>
+</body>
+</html>
